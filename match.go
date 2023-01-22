@@ -6,17 +6,17 @@ import (
 )
 
 // Match returns true if str matches pattern. This is a very
-// simple wildcard match where '*' matches on any number characters
-// and '?' matches on any one character.
+// simple wildcard match where '*' matches on any number characters.
 //
 // pattern:
-// 	{ term }
-// term:
-// 	'*'         matches any sequence of non-Separator characters
-// 	'?'         matches any single non-Separator character
-// 	c           matches character c (c != '*', '?', '\\')
-// 	'\\' c      matches character c
 //
+//	{ term }
+//
+// term:
+//
+//	'*'         matches any sequence of non-Separator characters
+//	c           matches character c (c != '*', '\\')
+//	'\\' c      matches character c
 func Match(str, pattern string) bool {
 	if pattern == "*" {
 		return true
@@ -77,10 +77,6 @@ func match(str, pat string, slen int, counter *int, maxcomp int) result {
 			}
 		}
 		switch pc {
-		case '?':
-			if ss == 0 {
-				return rNoMatch
-			}
 		case '*':
 			// Ignore repeating stars.
 			for len(pat) > 1 && pat[1] == '*' {
@@ -171,7 +167,7 @@ func matchTrimSuffix(str, pat string) (string, string, bool) {
 			break
 		}
 		sc, ss := utf8.DecodeLastRuneInString(str)
-		if !((pc == '?' && !esc) || pc == sc) {
+		if !(pc == sc) {
 			match = false
 			break
 		}
@@ -200,13 +196,8 @@ func Allowable(pattern string) (min, max string) {
 			wild = true
 			break
 		}
-		if pattern[i] == '?' {
-			minb = append(minb, 0)
-			maxb = append(maxb, maxRuneBytes[:]...)
-		} else {
-			minb = append(minb, pattern[i])
-			maxb = append(maxb, pattern[i])
-		}
+		minb = append(minb, pattern[i])
+		maxb = append(maxb, pattern[i])
 	}
 	if wild {
 		r, n := utf8.DecodeLastRune(maxb)
@@ -229,7 +220,7 @@ func Allowable(pattern string) (min, max string) {
 // IsPattern returns true if the string is a pattern.
 func IsPattern(str string) bool {
 	for i := 0; i < len(str); i++ {
-		if str[i] == '*' || str[i] == '?' {
+		if str[i] == '*' {
 			return true
 		}
 	}
